@@ -60,6 +60,9 @@ class Minimap
     useHardwareAcceleration:
       type: 'boolean'
       default: true
+    wrapGuide:
+      type: 'boolean'
+      default: true
     charWidth:
       type: 'integer'
       default: 1
