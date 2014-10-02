@@ -53,6 +53,7 @@ class MinimapView extends View
     @div class: 'minimap', =>
       @subview 'openQuickSettings', new MinimapOpenQuickSettingsView if atom.config.get('minimap.displayPluginsControls')
       @div outlet: 'miniScroller', class: "minimap-scroller"
+      @div outlet: 'wrapGuide', class: "wrap-guide"
       @div outlet: 'miniWrapper', class: "minimap-wrapper", =>
         @div outlet: 'miniUnderlayer', class: "minimap-underlayer"
         @subview 'renderView', new MinimapRenderView
@@ -99,6 +100,7 @@ class MinimapView extends View
     @renderView.setEditorView(@editorView)
 
     @updateMinimapView()
+    @updateWrapGuide()
 
   # Internal: Initializes the minimap view by registering to various events and
   # by retrieving the base configuration.
@@ -160,6 +162,12 @@ class MinimapView extends View
 
     @subscriptions.add @asDisposable atom.config.observe 'editor.softWrap', =>
       @updateMinimapView()
+
+    @subscriptions.add @asDisposable atom.config.observe('editor.preferredLineLength', callNow: false, @updateWrapGuide)
+    @subscriptions.add @asDisposable atom.config.observe('wrap-guide.columns', callNow: false, @updateWrapGuide)
+    @subscriptions.add @asDisposable @editor.on('path-changed', @updateWrapGuide)
+    @subscriptions.add @asDisposable @editor.on('grammar-changed', @updateWrapGuide)
+
 
   # Internal: Computes the scale of the minimap display relatively to the
   # corresponding editor view.
@@ -350,6 +358,9 @@ class MinimapView extends View
     scrollRange = totalHeight - height
 
     @transform @miniScroller[0], @translate(0, @indicator.ratioY * scrollRange)
+
+  updateWrapGuide: =>
+    @wrapGuide.css 'left', atom.config.getPositiveInt('editor.preferredLineLength', 80) * @getCharWidth()
 
   #    ######## ##     ## ######## ##    ## ########  ######
   #    ##       ##     ## ##       ###   ##    ##    ##    ##
